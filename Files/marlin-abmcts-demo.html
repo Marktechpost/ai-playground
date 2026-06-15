@@ -1,0 +1,252 @@
+<!-- ===== Marktechpost embeddable widget: AB-MCTS "Wider or Deeper" demo ===== -->
+<!-- Paste into a WordPress "Custom HTML" block. Self-contained, no external deps. -->
+<style>
+#mtp-abmcts-demo *{box-sizing:border-box!important;margin:0;padding:0}
+#mtp-abmcts-demo{
+  background:#111!important;color:#e8e8e8!important;border:1px solid #2a2a2a!important;
+  border-radius:14px!important;max-width:880px;margin:24px auto;padding:20px 20px 14px;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.5;overflow:hidden
+}
+#mtp-abmcts-demo h3{color:#fff!important;font-size:19px;font-weight:700;margin:0 0 4px}
+#mtp-abmcts-demo .mtp-sub{color:#9aa0a6!important;font-size:13px;margin-bottom:14px}
+#mtp-abmcts-demo .mtp-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+#mtp-abmcts-demo button{
+  background:#76B900!important;color:#0a0a0a!important;border:0!important;border-radius:8px!important;
+  font-weight:700;font-size:13px;padding:9px 14px;cursor:pointer;transition:filter .15s
+}
+#mtp-abmcts-demo button:hover{filter:brightness(1.1)}
+#mtp-abmcts-demo button.mtp-ghost{background:#1c1c1c!important;color:#76B900!important;border:1px solid #2f3b1a!important}
+#mtp-abmcts-demo button:disabled{opacity:.4;cursor:not-allowed}
+#mtp-abmcts-demo .mtp-slider{display:flex;align-items:center;gap:8px;font-size:12px;color:#bdbdbd!important;margin-left:auto}
+#mtp-abmcts-demo input[type=range]{accent-color:#76B900;width:120px}
+#mtp-abmcts-demo .mtp-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:#bdbdbd!important;cursor:pointer;user-select:none}
+#mtp-abmcts-demo .mtp-stage{
+  background:#0b0b0b!important;border:1px solid #232323!important;border-radius:10px!important;
+  position:relative;overflow:hidden;min-height:260px
+}
+#mtp-abmcts-demo svg{display:block;width:100%;height:auto}
+#mtp-abmcts-demo .mtp-edge{stroke:#3a3a3a;stroke-width:1.5;fill:none}
+#mtp-abmcts-demo .mtp-edge.best{stroke:#76B900;stroke-width:2.6}
+#mtp-abmcts-demo text{font-family:inherit}
+#mtp-abmcts-demo .mtp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+#mtp-abmcts-demo .mtp-panel{background:#0b0b0b!important;border:1px solid #232323!important;border-radius:10px!important;padding:12px}
+#mtp-abmcts-demo .mtp-panel h4{color:#76B900!important;font-size:12px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+#mtp-abmcts-demo .mtp-stat{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;border-bottom:1px solid #1a1a1a}
+#mtp-abmcts-demo .mtp-stat b{color:#fff!important}
+#mtp-abmcts-demo .mtp-log{font-size:12.5px;max-height:132px;overflow-y:auto}
+#mtp-abmcts-demo .mtp-log div{padding:3px 0;border-bottom:1px solid #1a1a1a;color:#cfcfcf!important}
+#mtp-abmcts-demo .mtp-log .w{color:#7fb3ff!important}
+#mtp-abmcts-demo .mtp-log .d{color:#76B900!important}
+#mtp-abmcts-demo .mtp-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:#9aa0a6!important;margin-top:10px;align-items:center}
+#mtp-abmcts-demo .mtp-chip{display:inline-flex;align-items:center;gap:5px}
+#mtp-abmcts-demo .mtp-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+#mtp-abmcts-demo .mtp-foot{text-align:center;color:#76B900!important;font-size:12px;font-weight:600;margin-top:14px;padding-top:10px;border-top:1px solid #232323}
+#mtp-abmcts-demo hr,#mtp-abmcts-demo p:empty,#mtp-abmcts-demo del,#mtp-abmcts-demo s{display:none!important}
+@media (max-width:640px){
+  #mtp-abmcts-demo{padding:14px}
+  #mtp-abmcts-demo .mtp-grid{grid-template-columns:1fr}
+  #mtp-abmcts-demo .mtp-slider{margin-left:0;width:100%}
+  #mtp-abmcts-demo input[type=range]{flex:1}
+}
+</style>
+
+<div id="mtp-abmcts-demo">
+  <h3>AB-MCTS: "Wider or Deeper?" &mdash; interactive search</h3>
+  <div class="mtp-sub">A simplified visual of Sakana AI's Adaptive Branching Monte Carlo Tree Search. Each step the policy chooses to widen (new candidate) or deepen (refine a promising line).</div>
+
+  <div class="mtp-controls">
+    <button id="mtp-run">► Run</button>
+    <button id="mtp-step" class="mtp-ghost">Step</button>
+    <button id="mtp-reset" class="mtp-ghost">Reset</button>
+    <label class="mtp-toggle"><input type="checkbox" id="mtp-multi"> Multi-LLM</label>
+    <div class="mtp-slider"><span>Deeper</span><input type="range" id="mtp-bias" min="0" max="100" value="50"><span>Wider</span></div>
+  </div>
+
+  <div class="mtp-stage"><svg id="mtp-svg" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet"></svg></div>
+
+  <div class="mtp-grid">
+    <div class="mtp-panel">
+      <h4>Search state</h4>
+      <div class="mtp-stat"><span>Budget used</span><b id="mtp-budget">0 / 24</b></div>
+      <div class="mtp-stat"><span>Nodes (candidates)</span><b id="mtp-nodes">1</b></div>
+      <div class="mtp-stat"><span>Best score</span><b id="mtp-best">0.00</b></div>
+      <div class="mtp-stat"><span>Wider / Deeper</span><b id="mtp-wd">0 / 0</b></div>
+    </div>
+    <div class="mtp-panel">
+      <h4>Decision log</h4>
+      <div class="mtp-log" id="mtp-log"></div>
+    </div>
+  </div>
+
+  <div class="mtp-legend">
+    <span class="mtp-chip"><span class="mtp-dot" style="background:#2a2a2a;border:1px solid #555"></span>low score</span>
+    <span class="mtp-chip"><span class="mtp-dot" style="background:#76B900"></span>high score</span>
+    <span class="mtp-chip"><span class="mtp-dot" style="background:transparent;border:2px solid #76B900"></span>best path</span>
+    <span id="mtp-models" style="display:none">
+      <span class="mtp-chip"><span class="mtp-dot" style="background:#7fb3ff"></span>Gemini 2.5 Pro</span>
+      <span class="mtp-chip"><span class="mtp-dot" style="background:#ffb454"></span>o4-mini</span>
+      <span class="mtp-chip"><span class="mtp-dot" style="background:#ff7a90"></span>DeepSeek-R1</span>
+    </span>
+  </div>
+
+  <div class="mtp-foot">© Marktechpost &middot; Illustrative model of AB-MCTS (TreeQuest, Apache 2.0)</div>
+</div>
+
+<script>
+(function(){
+  var SVGNS="http://www.w3.org/2000/svg";
+  var BUDGET=24, MODELS=[{n:"Gemini 2.5 Pro",c:"#7fb3ff"},{n:"o4-mini",c:"#ffb454"},{n:"DeepSeek-R1",c:"#ff7a90"}];
+  var nodes, idc, used, widers, deepers, timer=null;
+
+  var svg=document.getElementById("mtp-svg");
+  var $=function(id){return document.getElementById(id);};
+
+  function reset(){
+    if(timer){clearInterval(timer);timer=null;$("mtp-run").textContent="► Run";}
+    idc=0; used=0; widers=0; deepers=0;
+    nodes=[{id:idc++,parent:null,depth:0,score:0,model:0,children:[]}];
+    $("mtp-log").innerHTML="";
+    log('Initialized search tree at the root.','');
+    render();
+  }
+
+  function chooseModel(){return Math.floor(Math.random()*MODELS.length);}
+
+  // One AB-MCTS step: descend from root, at each node decide widen-here vs go-deeper.
+  function step(){
+    if(used>=BUDGET) return false;
+    var bias=(+$("mtp-bias").value)/100;        // 1 = always wider, 0 = always deeper
+    var cur=nodes[0];
+    // Descend until we decide to branch (widen) at the current node.
+    while(true){
+      var kids=cur.children.map(function(i){return nodes[i];});
+      // Probability of branching here (going wider) rises with the bias and with few kids.
+      var pWiden = bias*0.6 + 0.4/(kids.length+1);
+      if(kids.length===0 || Math.random()<pWiden){
+        // WIDER: generate a new candidate child at this node.
+        var base=cur.score;
+        var sc=clamp(base + (Math.random()*0.5 - 0.18));   // new lines vary a lot
+        addNode(cur,sc,'WIDER');
+        return true;
+      } else {
+        // DEEPER: move into the most promising child and refine further down.
+        kids.sort(function(a,b){return b.score-a.score;});
+        // chance to refine this best child directly into a deeper, better node
+        if(Math.random()<0.5){
+          var imp=clamp(kids[0].score + (Math.random()*0.22 - 0.04));
+          addNode(kids[0],imp,'DEEPER');
+          return true;
+        }
+        cur=kids[0]; // keep descending
+      }
+    }
+  }
+
+  function addNode(parent,score,kind){
+    var m = $("mtp-multi").checked ? chooseModel() : 0;
+    var node={id:idc++,parent:parent.id,depth:parent.depth+1,score:score,model:m,children:[]};
+    parent.children.push(nodes.length);
+    nodes.push(node);
+    used++;
+    if(kind==='WIDER') widers++; else deepers++;
+    var cls = kind==='WIDER'?'w':'d';
+    log('Step '+used+' · '+kind+' at depth '+parent.depth+' → '+score.toFixed(2), cls);
+    render();
+    return node;
+  }
+
+  function clamp(x){return Math.max(0,Math.min(1,x));}
+
+  function log(msg,cls){
+    var d=document.createElement('div'); if(cls) d.className=cls; d.textContent=msg;
+    var box=$("mtp-log"); box.insertBefore(d,box.firstChild);
+    while(box.children.length>40) box.removeChild(box.lastChild);
+  }
+
+  // Tidy-tree layout: leaves get sequential x, parents centered over children.
+  function layout(){
+    var leafX=0, pos={};
+    (function walk(n){
+      if(n.children.length===0){ pos[n.id]={x:leafX++,y:n.depth}; return; }
+      var xs=[];
+      n.children.forEach(function(i){ walk(nodes[i]); xs.push(pos[nodes[i].id].x); });
+      pos[n.id]={x:(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2,y:n.depth};
+    })(nodes[0]);
+    return pos;
+  }
+
+  function bestPath(){
+    var best=nodes[0];
+    nodes.forEach(function(n){ if(n.score>best.score) best=n; });
+    var set={}, cur=best;
+    while(cur){ set[cur.id]=true; cur = cur.parent===null?null:nodes.find(function(x){return x.id===cur.parent;}); }
+    return set;
+  }
+
+  function render(){
+    var pos=layout();
+    var maxX=0,maxY=0;
+    for(var k in pos){ if(pos[k].x>maxX)maxX=pos[k].x; if(pos[k].y>maxY)maxY=pos[k].y; }
+    var padX=40, padY=34, gapX=Math.max(54, 520/(maxX+1)), gapY=64;
+    var W=padX*2 + maxX*gapX, H=padY*2 + maxY*gapY;
+    W=Math.max(W,560); H=Math.max(H,240);
+    svg.setAttribute("viewBox","0 0 "+W+" "+H);
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    var best=bestPath();
+    var XY=function(id){return {x:padX+pos[id].x*gapX, y:padY+pos[id].y*gapY};};
+
+    // edges
+    nodes.forEach(function(n){
+      if(n.parent===null) return;
+      var a=XY(n.parent), b=XY(n.id);
+      var e=document.createElementNS(SVGNS,"path");
+      e.setAttribute("d","M"+a.x+","+a.y+" C"+a.x+","+(a.y+gapY/2)+" "+b.x+","+(b.y-gapY/2)+" "+b.x+","+b.y);
+      e.setAttribute("class","mtp-edge"+((best[n.id]&&best[n.parent])?" best":""));
+      svg.appendChild(e);
+    });
+    // nodes
+    nodes.forEach(function(n){
+      var p=XY(n.id);
+      var g=document.createElementNS(SVGNS,"circle");
+      g.setAttribute("cx",p.x); g.setAttribute("cy",p.y); g.setAttribute("r",n.id===0?13:11);
+      // fill = score ramp toward NVIDIA green
+      var t=n.score; var r=Math.round(42+(118-42)*t), gg=Math.round(42+(185-42)*t), bb=Math.round(42+(0-42)*t);
+      g.setAttribute("fill","rgb("+r+","+gg+","+bb+")");
+      var stroke = $("mtp-multi").checked ? MODELS[n.model].c : (best[n.id]?"#76B900":"#555");
+      g.setAttribute("stroke", best[n.id]?"#76B900":stroke);
+      g.setAttribute("stroke-width", best[n.id]?3:1.5);
+      svg.appendChild(g);
+      var tx=document.createElementNS(SVGNS,"text");
+      tx.setAttribute("x",p.x); tx.setAttribute("y",p.y+3.5); tx.setAttribute("text-anchor","middle");
+      tx.setAttribute("font-size","9"); tx.setAttribute("fill", t>0.55?"#0a0a0a":"#e8e8e8");
+      tx.textContent = n.id===0?"root":n.score.toFixed(2);
+      svg.appendChild(tx);
+    });
+
+    // stats
+    var bestScore=0; nodes.forEach(function(n){if(n.score>bestScore)bestScore=n.score;});
+    $("mtp-budget").textContent=used+" / "+BUDGET;
+    $("mtp-nodes").textContent=nodes.length;
+    $("mtp-best").textContent=bestScore.toFixed(2);
+    $("mtp-wd").textContent=widers+" / "+deepers;
+    $("mtp-step").disabled = used>=BUDGET;
+    if(used>=BUDGET && timer){clearInterval(timer);timer=null;$("mtp-run").textContent="✓ Done";}
+  }
+
+  $("mtp-run").onclick=function(){
+    if(used>=BUDGET) reset();
+    if(timer){clearInterval(timer);timer=null;this.textContent="► Run";return;}
+    this.textContent="⏸ Pause";
+    var self=this;
+    timer=setInterval(function(){ if(!step()){clearInterval(timer);timer=null;self.textContent="✓ Done";} },520);
+  };
+  $("mtp-step").onclick=function(){ if(used<BUDGET) step(); };
+  $("mtp-reset").onclick=reset;
+  $("mtp-multi").onchange=function(){ $("mtp-models").style.display=this.checked?"inline":"none"; render(); };
+  $("mtp-bias").oninput=function(){};
+
+  reset();
+})();
+</script>
+<!-- ===== end Marktechpost widget ===== -->
