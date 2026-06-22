@@ -1,0 +1,355 @@
+<!-- lift interactive demo — paste into a WordPress "Custom HTML" block -->
+<iframe
+  title="lift schema extraction demo"
+  style="width:100%;border:0;display:block;border-radius:10px;overflow:hidden"
+  height="780"
+  loading="lazy"
+  srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+&lt;title&gt;lift schema extraction demo&lt;/title&gt;
+&lt;style&gt;
+  :root{
+    --bg:#ffffff; --ink:#0a0a0a; --soft:#52525b; --line:#e4e4e7;
+    --panel:#fafafa; --chip:#f4f4f5; --hi:#000000; --hiink:#ffffff;
+    --null:#a1a1aa; --mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;line-height:1.45;font-size:14px}
+  .wrap{max-width:980px;margin:0 auto;padding:18px 18px 8px}
+  .head{border:1px solid var(--line);border-bottom:2px solid var(--ink);
+    border-radius:10px 10px 0 0;padding:14px 16px;background:var(--bg)}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--soft)}
+  .title{font-size:19px;font-weight:700;margin:4px 0 2px;letter-spacing:-.01em}
+  .sub{font-size:12.5px;color:var(--soft)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:0;
+    border:1px solid var(--line);border-top:none}
+  .col{padding:14px 16px}
+  .col + .col{border-left:1px solid var(--line)}
+  .step{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--soft);margin:0 0 9px;display:flex;
+    align-items:center;gap:8px}
+  .step .n{display:inline-flex;width:18px;height:18px;align-items:center;
+    justify-content:center;border:1px solid var(--ink);border-radius:50%;
+    font-size:10px;color:var(--ink)}
+  .tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .tab{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line);
+    background:var(--bg);color:var(--ink);padding:6px 10px;border-radius:6px;
+    cursor:pointer;transition:.12s}
+  .tab:hover{border-color:var(--ink)}
+  .tab[aria-selected=&quot;true&quot;]{background:var(--hi);color:var(--hiink);border-color:var(--hi)}
+  .doc{border:1px solid var(--line);background:var(--panel);border-radius:8px;
+    padding:12px;font-size:11.5px;height:250px;overflow:auto}
+  .doc .pg{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+    color:var(--soft);text-transform:uppercase;border-bottom:1px dashed var(--line);
+    padding-bottom:4px;margin:0 0 8px}
+  .doc h4{margin:0 0 6px;font-size:13px}
+  .doc table{width:100%;border-collapse:collapse;margin:6px 0;font-size:11px}
+  .doc td{border-bottom:1px solid var(--line);padding:3px 4px}
+  .doc .mut{color:var(--soft)}
+  .doc .row{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+  .fields{display:flex;flex-direction:column;gap:6px;height:208px;overflow:auto;
+    padding-right:2px}
+  .f{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--line);
+    border-radius:7px;padding:8px 10px;cursor:pointer;background:var(--bg);
+    transition:.12s}
+  .f:hover{border-color:var(--ink)}
+  .f input{margin:2px 0 0;accent-color:#000;width:14px;height:14px;cursor:pointer}
+  .f .meta{flex:1;min-width:0}
+  .f .name{font-family:var(--mono);font-size:12px}
+  .f .desc{font-size:11px;color:var(--soft);margin-top:1px}
+  .f .tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;
+    text-transform:uppercase;border:1px solid var(--line);border-radius:4px;
+    padding:1px 5px;color:var(--soft);white-space:nowrap;margin-top:3px;
+    display:inline-block}
+  .f .tag.absent{border-color:var(--ink);color:var(--ink)}
+  .req{font-family:var(--mono);font-size:9px;color:var(--soft)}
+  .ctrls{display:flex;align-items:center;gap:10px;margin-top:12px}
+  .btn{font-family:var(--mono);font-size:12px;letter-spacing:.03em;
+    background:var(--hi);color:var(--hiink);border:1px solid var(--hi);
+    padding:9px 16px;border-radius:7px;cursor:pointer;transition:.12s}
+  .btn:hover{opacity:.85}
+  .btn.ghost{background:var(--bg);color:var(--ink);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--ink)}
+  .out{border:1px solid var(--line);border-top:none;border-radius:0 0 10px 10px;
+    padding:14px 16px;background:var(--bg)}
+  .outhead{display:flex;align-items:center;justify-content:space-between;
+    gap:10px;margin-bottom:8px;flex-wrap:wrap}
+  .outhead .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;color:var(--soft)}
+  .stats{display:flex;gap:14px;font-family:var(--mono);font-size:11px;color:var(--soft)}
+  .stats b{color:var(--ink);font-weight:600}
+  pre{margin:0;background:var(--panel);border:1px solid var(--line);
+    border-radius:8px;padding:12px 14px;font-family:var(--mono);font-size:12px;
+    line-height:1.6;overflow:auto;max-height:250px}
+  .k{color:var(--ink)}
+  .s{color:#27272a}
+  .n{color:#3f3f46}
+  .nul{color:var(--null);font-style:italic}
+  .badge{font-family:var(--mono);font-size:9px;letter-spacing:.06em;
+    text-transform:uppercase;border-radius:4px;padding:1px 6px;margin-left:8px}
+  .badge.found{background:var(--ink);color:#fff}
+  .badge.absn{background:var(--bg);color:var(--ink);border:1px solid var(--ink)}
+  .note{font-size:11.5px;color:var(--soft);margin-top:10px;line-height:1.5}
+  .note code{font-family:var(--mono);background:var(--chip);padding:1px 5px;
+    border-radius:4px;color:var(--ink)}
+  .foot{display:flex;align-items:center;justify-content:space-between;
+    gap:10px;flex-wrap:wrap;padding:12px 2px 4px;margin-top:6px;
+    border-top:1px solid var(--line);color:var(--soft);font-size:11px}
+  .foot .brand{font-family:var(--mono);font-size:11px;color:var(--ink);font-weight:600}
+  .foot .brand span{color:var(--soft);font-weight:400}
+  a{color:var(--ink)}
+  @media (max-width:640px){
+    .grid{grid-template-columns:1fr}
+    .col + .col{border-left:none;border-top:1px solid var(--line)}
+    .doc{height:220px}.fields{height:auto;max-height:260px}
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;wrap&quot;&gt;
+  &lt;div class=&quot;head&quot;&gt;
+    &lt;div class=&quot;kicker&quot;&gt;Interactive demo · illustrative&lt;/div&gt;
+    &lt;div class=&quot;title&quot;&gt;lift — schema &amp;rarr; structured JSON&lt;/div&gt;
+    &lt;div class=&quot;sub&quot;&gt;Pick a document, choose the schema fields, and extract. lift returns valid JSON of your schema's shape, and leaves genuinely absent fields &lt;code style=&quot;font-family:var(--mono)&quot;&gt;null&lt;/code&gt;.&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;grid&quot;&gt;
+    &lt;div class=&quot;col&quot;&gt;
+      &lt;div class=&quot;step&quot;&gt;&lt;span class=&quot;n&quot;&gt;1&lt;/span&gt; Document&lt;/div&gt;
+      &lt;div class=&quot;tabs&quot; id=&quot;tabs&quot; role=&quot;tablist&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;doc&quot; id=&quot;doc&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;col&quot;&gt;
+      &lt;div class=&quot;step&quot;&gt;&lt;span class=&quot;n&quot;&gt;2&lt;/span&gt; Schema fields&lt;/div&gt;
+      &lt;div class=&quot;fields&quot; id=&quot;fields&quot;&gt;&lt;/div&gt;
+      &lt;div class=&quot;ctrls&quot;&gt;
+        &lt;button class=&quot;btn&quot; id=&quot;run&quot;&gt;Extract&lt;/button&gt;
+        &lt;button class=&quot;btn ghost&quot; id=&quot;all&quot;&gt;Toggle all&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;out&quot;&gt;
+    &lt;div class=&quot;outhead&quot;&gt;
+      &lt;span class=&quot;lbl&quot;&gt;Output · &amp;lt;filename&amp;gt;.json&lt;/span&gt;
+      &lt;div class=&quot;stats&quot; id=&quot;stats&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;pre id=&quot;json&quot;&gt;&lt;span class=&quot;nul&quot;&gt;// Select fields and press Extract&lt;/span&gt;&lt;/pre&gt;
+    &lt;div class=&quot;note&quot; id=&quot;note&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;foot&quot;&gt;
+    &lt;div class=&quot;brand&quot;&gt;Marktechpost &lt;span&gt;· interactive embed&lt;/span&gt;&lt;/div&gt;
+    &lt;div&gt;Illustrative demo of lift's schema-constrained extraction. Run the real 9B model via &lt;code style=&quot;font-family:var(--mono)&quot;&gt;pip install lift-pdf&lt;/code&gt;.&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+/* ---- Illustrative dataset: fields a real lift schema might define.
+   &quot;absent&quot; fields are not present in the document, so lift returns null. ---- */
+const DOCS = {
+  invoice: {
+    label: &quot;Invoice (1 page)&quot;,
+    render: `&lt;div class=&quot;pg&quot;&gt;Page 1 / 1 — RPC Wireless&lt;/div&gt;
+      &lt;h4&gt;INVOICE  #INV-20458&lt;/h4&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Bill to&lt;/span&gt;&lt;span&gt;Acme Logistics LLC&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Issue date&lt;/span&gt;&lt;span&gt;2024-09-13&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Due date&lt;/span&gt;&lt;span&gt;2024-10-13&lt;/span&gt;&lt;/div&gt;
+      &lt;table&gt;
+        &lt;tr&gt;&lt;td&gt;Mounting hardware&lt;/td&gt;&lt;td style=&quot;text-align:right&quot;&gt;$120.00&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Antenna unit ×2&lt;/td&gt;&lt;td style=&quot;text-align:right&quot;&gt;$410.00&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Install labor&lt;/td&gt;&lt;td style=&quot;text-align:right&quot;&gt;$310.00&lt;/td&gt;&lt;/tr&gt;
+      &lt;/table&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Total due&lt;/span&gt;&lt;span&gt;&lt;b&gt;$840.00&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;mut&quot; style=&quot;margin-top:8px&quot;&gt;No tax registration number printed on this invoice.&lt;/div&gt;`,
+    fields: [
+      {name:&quot;invoice_number&quot;, desc:&quot;Invoice identifier&quot;, type:&quot;string&quot;, req:true, val:&quot;INV-20458&quot;},
+      {name:&quot;total&quot;, desc:&quot;Total amount due&quot;, type:&quot;number&quot;, req:true, val:840.00},
+      {name:&quot;due_date&quot;, desc:&quot;Payment due date&quot;, type:&quot;string&quot;, req:false, val:&quot;2024-10-13&quot;},
+      {name:&quot;tax_id&quot;, desc:&quot;Seller tax / VAT number&quot;, type:&quot;string&quot;, req:false, absent:true},
+      {name:&quot;line_items&quot;, desc:&quot;Array of {description, amount}&quot;, type:&quot;array&quot;, req:false, val:[
+        {description:&quot;Mounting hardware&quot;, amount:120.00},
+        {description:&quot;Antenna unit ×2&quot;, amount:410.00},
+        {description:&quot;Install labor&quot;, amount:310.00}
+      ]}
+    ]
+  },
+  contract: {
+    label: &quot;Service agreement (2 pages)&quot;,
+    render: `&lt;div class=&quot;pg&quot;&gt;Page 1 / 2 — Master Services Agreement&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Party A&lt;/span&gt;&lt;span&gt;Northwind Systems Inc.&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Party B&lt;/span&gt;&lt;span&gt;Brightline Data Co.&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Effective&lt;/span&gt;&lt;span&gt;2026-01-05&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;mut&quot; style=&quot;margin:8px 0&quot;&gt;3. TERM. The total contract value is defined in
+        Schedule A, payable across the term set out below…&lt;/div&gt;
+      &lt;div class=&quot;pg&quot; style=&quot;margin-top:10px&quot;&gt;Page 2 / 2 — Schedule A&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Schedule A value&lt;/span&gt;&lt;span&gt;$48,000 over 12 months&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Termination notice&lt;/span&gt;&lt;span&gt;30 days&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Governing law&lt;/span&gt;&lt;span&gt;State of Delaware&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;mut&quot; style=&quot;margin-top:8px&quot;&gt;No auto-renewal clause appears in this agreement.&lt;/div&gt;`,
+    fields: [
+      {name:&quot;party_a&quot;, desc:&quot;First contracting party&quot;, type:&quot;string&quot;, req:true, val:&quot;Northwind Systems Inc.&quot;},
+      {name:&quot;party_b&quot;, desc:&quot;Second contracting party&quot;, type:&quot;string&quot;, req:true, val:&quot;Brightline Data Co.&quot;},
+      {name:&quot;effective_date&quot;, desc:&quot;Agreement effective date&quot;, type:&quot;string&quot;, req:false, val:&quot;2026-01-05&quot;},
+      {name:&quot;total_value&quot;, desc:&quot;Contract value (spans pages 1→2)&quot;, type:&quot;string&quot;, req:false, span:true, val:&quot;$48,000 over 12 months&quot;},
+      {name:&quot;termination_notice_days&quot;, desc:&quot;Required notice period&quot;, type:&quot;integer&quot;, req:false, val:30},
+      {name:&quot;governing_law&quot;, desc:&quot;Governing jurisdiction&quot;, type:&quot;string&quot;, req:false, val:&quot;State of Delaware&quot;},
+      {name:&quot;auto_renewal&quot;, desc:&quot;Whether the contract auto-renews&quot;, type:&quot;boolean&quot;, req:false, absent:true}
+    ]
+  },
+  lab: {
+    label: &quot;Lab report (3 pages)&quot;,
+    render: `&lt;div class=&quot;pg&quot;&gt;Page 1 / 3 — Patient summary&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Patient ID&lt;/span&gt;&lt;span&gt;PT-77310&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;row&quot;&gt;&lt;span class=&quot;mut&quot;&gt;Collected&lt;/span&gt;&lt;span&gt;2026-03-02&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;pg&quot; style=&quot;margin-top:10px&quot;&gt;Page 2 / 3 — Panel results&lt;/div&gt;
+      &lt;table&gt;
+        &lt;tr&gt;&lt;td&gt;Hemoglobin&lt;/td&gt;&lt;td style=&quot;text-align:right&quot;&gt;13.8 g/dL&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;White cell count&lt;/td&gt;&lt;td style=&quot;text-align:right&quot;&gt;6.1 ×10⁹/L&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Platelets&lt;/td&gt;&lt;td style=&quot;text-align:right&quot;&gt;240 ×10⁹/L&lt;/td&gt;&lt;/tr&gt;
+      &lt;/table&gt;
+      &lt;div class=&quot;pg&quot; style=&quot;margin-top:10px&quot;&gt;Page 3 / 3 — Notes&lt;/div&gt;
+      &lt;div class=&quot;mut&quot;&gt;Reviewing physician sign-off pending; not yet recorded.&lt;/div&gt;`,
+    fields: [
+      {name:&quot;patient_id&quot;, desc:&quot;Patient identifier&quot;, type:&quot;string&quot;, req:true, val:&quot;PT-77310&quot;},
+      {name:&quot;collection_date&quot;, desc:&quot;Sample collection date&quot;, type:&quot;string&quot;, req:false, val:&quot;2026-03-02&quot;},
+      {name:&quot;results&quot;, desc:&quot;Array of {analyte, value} across pages&quot;, type:&quot;array&quot;, req:false, val:[
+        {analyte:&quot;Hemoglobin&quot;, value:&quot;13.8 g/dL&quot;},
+        {analyte:&quot;White cell count&quot;, value:&quot;6.1 ×10⁹/L&quot;},
+        {analyte:&quot;Platelets&quot;, value:&quot;240 ×10⁹/L&quot;}
+      ]},
+      {name:&quot;reviewing_physician&quot;, desc:&quot;Signing physician name&quot;, type:&quot;string&quot;, req:false, absent:true}
+    ]
+  }
+};
+
+let current = &quot;invoice&quot;;
+const selected = {}; // doc -&gt; Set(fieldName)
+
+function ensureSel(doc){
+  if(!selected[doc]){
+    selected[doc] = new Set(DOCS[doc].fields.map(f=&gt;f.name));
+  }
+  return selected[doc];
+}
+
+const tabsEl = document.getElementById('tabs');
+const docEl  = document.getElementById('doc');
+const fieldsEl = document.getElementById('fields');
+const jsonEl = document.getElementById('json');
+const statsEl = document.getElementById('stats');
+const noteEl = document.getElementById('note');
+
+function buildTabs(){
+  tabsEl.innerHTML = &quot;&quot;;
+  Object.keys(DOCS).forEach(k=&gt;{
+    const b=document.createElement('button');
+    b.className='tab'; b.textContent=DOCS[k].label; b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', k===current ? 'true':'false');
+    b.onclick=()=&gt;{ current=k; render(); };
+    tabsEl.appendChild(b);
+  });
+}
+
+function buildFields(){
+  const sel = ensureSel(current);
+  fieldsEl.innerHTML=&quot;&quot;;
+  DOCS[current].fields.forEach(f=&gt;{
+    const row=document.createElement('label');
+    row.className='f';
+    const cb=document.createElement('input');
+    cb.type='checkbox'; cb.checked=sel.has(f.name);
+    cb.onchange=()=&gt;{ cb.checked ? sel.add(f.name) : sel.delete(f.name); };
+    const meta=document.createElement('div'); meta.className='meta';
+    let tag = f.absent ? `&lt;span class=&quot;tag absent&quot;&gt;not in document&lt;/span&gt;`
+            : f.span  ? `&lt;span class=&quot;tag&quot;&gt;spans pages&lt;/span&gt;` : &quot;&quot;;
+    meta.innerHTML = `&lt;div class=&quot;name&quot;&gt;${f.name}&lt;span class=&quot;req&quot;&gt; : ${f.type}${f.req?' · required':''}&lt;/span&gt;&lt;/div&gt;
+      &lt;div class=&quot;desc&quot;&gt;${f.desc}&lt;/div&gt;${tag}`;
+    row.appendChild(cb); row.appendChild(meta);
+    fieldsEl.appendChild(row);
+  });
+}
+
+function jval(v, indent){
+  const pad = '  '.repeat(indent);
+  const pad2 = '  '.repeat(indent+1);
+  if(v===null) return `&lt;span class=&quot;nul&quot;&gt;null&lt;/span&gt;`;
+  if(typeof v==='number') return `&lt;span class=&quot;n&quot;&gt;${v}&lt;/span&gt;`;
+  if(typeof v==='boolean') return `&lt;span class=&quot;n&quot;&gt;${v}&lt;/span&gt;`;
+  if(typeof v==='string') return `&lt;span class=&quot;s&quot;&gt;&quot;${v}&quot;&lt;/span&gt;`;
+  if(Array.isArray(v)){
+    if(v.length===0) return '[]';
+    const items=v.map(it=&gt;pad2+jval(it,indent+1)).join(',\n');
+    return `[\n${items}\n${pad}]`;
+  }
+  // object
+  const keys=Object.keys(v);
+  const body=keys.map(k=&gt;`${pad2}&lt;span class=&quot;k&quot;&gt;&quot;${k}&quot;&lt;/span&gt;: ${jval(v[k],indent+1)}`).join(',\n');
+  return `{\n${body}\n${pad}}`;
+}
+
+function extract(){
+  const sel = ensureSel(current);
+  const fields = DOCS[current].fields.filter(f=&gt;sel.has(f.name));
+  if(fields.length===0){
+    jsonEl.innerHTML = `&lt;span class=&quot;nul&quot;&gt;// No fields selected — nothing to extract&lt;/span&gt;`;
+    statsEl.innerHTML=&quot;&quot;; noteEl.innerHTML=&quot;&quot;; emitSize(); return;
+  }
+  // Build object honoring schema shape; absent -&gt; null (abstention)
+  const obj={}; let found=0, nulls=0, spans=0;
+  fields.forEach(f=&gt;{
+    if(f.absent){ obj[f.name]=null; nulls++; }
+    else { obj[f.name]=f.val; found++; if(f.span) spans++; }
+  });
+  const lines = Object.keys(obj).map(k=&gt;{
+    const f = fields.find(x=&gt;x.name===k);
+    const badge = f.absent ? `&lt;span class=&quot;badge absn&quot;&gt;null · abstained&lt;/span&gt;`
+                           : `&lt;span class=&quot;badge found&quot;&gt;found&lt;/span&gt;`;
+    return `  &lt;span class=&quot;k&quot;&gt;&quot;${k}&quot;&lt;/span&gt;: ${jval(obj[k],1)}${badge}`;
+  });
+  jsonEl.innerHTML = `{\n${lines.join(',\n')}\n}`;
+  statsEl.innerHTML = `&lt;span&gt;&lt;b&gt;${found}&lt;/b&gt; found&lt;/span&gt;&lt;span&gt;&lt;b&gt;${nulls}&lt;/b&gt; null&lt;/span&gt;&lt;span&gt;&lt;b&gt;${fields.length}&lt;/b&gt; fields&lt;/span&gt;`;
+  let n = `Output is valid JSON of exactly the shape you selected — that is schema-constrained decoding. `;
+  if(nulls&gt;0) n += `Fields not present in the document came back &lt;code&gt;null&lt;/code&gt; instead of a guess (abstention). `;
+  if(spans&gt;0) n += `&lt;code&gt;total_value&lt;/code&gt; is resolved from values that span two pages, read in a single pass.`;
+  noteEl.innerHTML = n;
+  emitSize();
+}
+
+function render(){
+  buildTabs();
+  docEl.innerHTML = DOCS[current].render;
+  buildFields();
+  jsonEl.innerHTML = `&lt;span class=&quot;nul&quot;&gt;// Press Extract to run the selected schema&lt;/span&gt;`;
+  statsEl.innerHTML=&quot;&quot;; noteEl.innerHTML=&quot;&quot;;
+  emitSize();
+}
+
+document.getElementById('run').onclick = extract;
+document.getElementById('all').onclick = ()=&gt;{
+  const sel=ensureSel(current);
+  const all = DOCS[current].fields;
+  const allOn = all.every(f=&gt;sel.has(f.name));
+  all.forEach(f=&gt; allOn ? sel.delete(f.name) : sel.add(f.name));
+  buildFields(); emitSize();
+};
+
+/* auto-resize: post component offsetHeight + 40 to parent */
+function emitSize(){
+  requestAnimationFrame(()=&gt;{
+    const h = (document.querySelector('.wrap').offsetHeight || document.body.offsetHeight) + 40;
+    parent.postMessage({type:'lift-demo-height', height:h}, '*');
+  });
+}
+window.addEventListener('load', ()=&gt;{ render(); emitSize(); });
+window.addEventListener('resize', emitSize);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
